@@ -30,11 +30,6 @@ namespace RLMatchResultConsole.Views
 
         private IList<MatchResult> _shownMatches = new List<MatchResult>();
 
-        private readonly ColorScheme NormalNoFocusColorScheme = new ColorScheme();
-        private readonly ColorScheme WinColorScheme = new ColorScheme();
-        private readonly ColorScheme LossColorScheme = new ColorScheme();
-
-
         public SessionView(IViewRegister viewRegister, IDataCache dataCache, DataFilter filter, MatchView matchView)
         {
             _viewRegister = viewRegister;
@@ -123,7 +118,7 @@ namespace RLMatchResultConsole.Views
             _sessionRLTable.ClearRows();
 
             var matches = _shownMatches.Count;
-            var wins = String.Format("{0,8}", _shownMatches.Count(mr => mr.Match.Result == Result.Win));
+            var wins =  _shownMatches.Count(mr => mr.Match.Result == Result.Win);
             var losses = _shownMatches.Count(mr => mr.Match.Result == Result.Loss);
             var gfs = _shownMatches.Sum(mr => mr.Teams[0].TeamScore);
             var gas = _shownMatches.Sum(mr => mr.Teams[1].TeamScore);
