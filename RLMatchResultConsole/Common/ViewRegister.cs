@@ -18,6 +18,8 @@ namespace RLMatchResultConsole.Common
 
         public Window ContentWindow { get; set; } = new Window();
 
+        public StatusBar StatusBar { get; set; } = new StatusBar();
+
         public void UpdateCurrentView()
         {
             if (_currentView != null)
@@ -37,6 +39,7 @@ namespace RLMatchResultConsole.Common
             _currentView = view;
             _currentView.Start();
             ContentWindow.Title = view.GetTitle();
+            StatusBar.Items = new StatusItem[] { };
         }
 
         public void SwitchToPreviousView()
@@ -56,6 +59,13 @@ namespace RLMatchResultConsole.Common
                 Environment.Exit(-2);
             }
 
+        }
+
+        public void ShowStatus(string message)
+        {
+            StatusBar.Items = new StatusItem[] {
+                new StatusItem(Key.Null, message, () => { })
+            }; 
         }
 
     }

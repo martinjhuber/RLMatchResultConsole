@@ -18,5 +18,7 @@ namespace RLMatchResultConsole.Data
         void AddSession(Session session);
 
         IEnumerable<Session> GetFilteredSessions();
+
+        void Clear();
     }
 }

@@ -19,81 +19,100 @@ namespace RLMatchResultConsole.Data
     internal class DataLoader 
     {
 
-        const string DEFAULT_MATCHRESULTS_DIR = ".\\MatchResults";
-
         private readonly ISettings _settings;
         private readonly IDataCache _dataCache;
-
 
         public DataLoader(ISettings settings, IDataCache dataCache) {
             _settings = settings;
             _dataCache = dataCache;
         }
 
-        public delegate bool ProgressCallback(float fraction, int loaded, int total, int sessions);
-        public delegate void FinishedCallback();
+        public enum ProgressType
+        {
+            MatchesFound,
+            MatchesLoaded,
+            MatchesAnalysed,
+            SessionsGenerated,
+            FinishedLoading
+        }
 
-        internal void LoadData(ProgressCallback progressCallback, FinishedCallback finishedCallback)
+        public delegate void ProgressCallback(ProgressType type, int count);
+
+        internal void LoadFullData(ProgressCallback progressCallback)
         {
 
-            string path = _settings.MatchResultDirectory ?? DEFAULT_MATCHRESULTS_DIR;
+            _dataCache.Clear();
+
+            string path = _settings.MatchResultDirectory;
 
             DirectoryInfo dir = new DirectoryInfo(path);
             FileInfo[] files = dir.GetFiles("*.json").ToArray();
-            int total = files.Length;
-            int loaded = 0;
+
+            progressCallback(ProgressType.MatchesFound, files.Length);
 
             foreach (FileInfo fileInfo in files)
             {
-                string fileContent = File.ReadAllText(fileInfo.FullName);
-                string[] jsonStrings;
-
-                MatchResult ? matchResult = null;
-
-                if (fileInfo.Name.EndsWith(".multi.json"))
-                {
-                    jsonStrings = fileContent.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-                    total += jsonStrings.Length - 1;
-                }
-                else
-                {
-                    jsonStrings = new string[] { fileContent };
-                }
-
-                foreach (string line in jsonStrings)
-                {
-                    matchResult = ParseMatchResult(line);
-                    if (matchResult != null)
-                    {
-                        matchResult.FileName = fileInfo.Name;
-                        _dataCache.AddMatchResult(matchResult);
-                    }
-                    loaded++;
-                    progressCallback((float)loaded / (float)total * 0.8F, loaded, total, 0);
-
-                    //Thread.Sleep(1);
-                }
-
+                LoadFile(fileInfo, progressCallback);
             }
 
-            loaded = 0;
             foreach (MatchResult matchResult in _dataCache.MatchResults.OrderByDescending(mr => mr.Date))
             {
-                Session? session = _dataCache.Sessions.FirstOrDefault(s => s.IsMatchResultInSession(matchResult));
-                if (session is null)
-                {
-                    session = new Session();
-                    _dataCache.AddSession(session);
-                }
-                session.AddMatchResult(matchResult);
-
-                ++loaded;
-                progressCallback(0.8F + (float)loaded / (float)total * 0.2F, total, total, _dataCache.Sessions.Count);   // creating sessions is 20% of work
-
+                GenerateOrAddToSession(matchResult, progressCallback);
             }
 
-            finishedCallback();
+            progressCallback(ProgressType.FinishedLoading, 0);
 
+        }
+
+        public List<MatchResult> LoadFile(FileInfo fileInfo, ProgressCallback progressCallback)
+        {
+
+            string fileContent = File.ReadAllText(fileInfo.FullName);
+            string[] jsonStrings;
+
+            List<MatchResult> matchResults = new List<MatchResult>();
+
+            if (fileInfo.Name.EndsWith(".multi.json"))
+            {
+                jsonStrings = fileContent.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                progressCallback(ProgressType.MatchesFound, jsonStrings.Length);
+            }
+            else
+            {
+                jsonStrings = new string[] { fileContent };
+            }
+
+            foreach (string line in jsonStrings)
+            {
+                var matchResult = ParseMatchResult(line);
+                if (matchResult != null)
+                {
+                    matchResult.FileName = fileInfo.Name;
+                    matchResults.Add(matchResult);
+                    _dataCache.AddMatchResult(matchResult);
+                }
+                progressCallback(ProgressType.MatchesLoaded, 1);
+
+                //Thread.Sleep(1);
+            }
+
+            return matchResults;
+        }
+
+        public Session GenerateOrAddToSession(MatchResult matchResult, ProgressCallback progressCallback)
+        {
+            Session? session = _dataCache.Sessions.FirstOrDefault(s => s.IsMatchResultInSession(matchResult));
+            if (session is null)
+            {
+                session = new Session();
+                _dataCache.AddSession(session);
+                progressCallback(ProgressType.SessionsGenerated, 1);
+            }
+            session.AddMatchResult(matchResult);
+            progressCallback(ProgressType.MatchesAnalysed, 1);
+
+            //Thread.Sleep(1);
+            return session;
         }
 
         internal MatchResult? ParseMatchResult (string content)
@@ -163,6 +182,8 @@ namespace RLMatchResultConsole.Data
                     mr.Match = m;
                 }
 
+                bool mvpIsSet = false;
+
                 if (matchResultV1.players != null && matchResultV1.players.Count == 2)
                 {
                     for (int i = 0; i <= 1; i++)
@@ -184,8 +205,28 @@ namespace RLMatchResultConsole.Data
                                 IsMvp = player.isMvp == 1,
                             };
                             playerList.Add(p);
+                            if (!mvpIsSet && player.isMvp == 1)
+                            {
+                                mvpIsSet = true;
+                            } 
                         }
                         mr.Players.Add(playerList);
+                    }
+                }
+
+                // The Rocket League in-game stats that we get via the API do not return that the player
+                // of the winning team with the most points is an MVP if this player has less points than
+                // any player of the opposing team.
+                // In such a case, we get no MVP at all. However, as the game awards the MVP even if 
+                // the player does not have the most points overall, we have to fix this discrepancy when
+                // we load the match results.
+                if (!mvpIsSet && mr.Players.Count == 2)
+                {
+                    int winnerTeam = mr.Match.Result == Result.Win ? 0 : 1;
+                    var mvp = mr.Players[winnerTeam].OrderByDescending(p => p.Score).FirstOrDefault();
+                    if (mvp is not null)
+                    {
+                        mvp.IsMvp = true;
                     }
                 }
 

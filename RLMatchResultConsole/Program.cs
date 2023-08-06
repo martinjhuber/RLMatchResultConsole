@@ -36,6 +36,7 @@ namespace RLMatchResultConsole {
                 .AddSingleton<DataFilter, DataFilter>()
                 .AddSingleton<IDataCache, DataCache>()
                 .AddTransient<DataLoader, DataLoader>()
+                .AddSingleton<DataFileWatcher, DataFileWatcher>()
                 // Views
                 .AddTransient<DataInitialisationView, DataInitialisationView>()
                 .AddTransient<FiltersView, FiltersView>()

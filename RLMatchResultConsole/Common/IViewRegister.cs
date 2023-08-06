@@ -13,12 +13,14 @@ namespace RLMatchResultConsole.Common
     {
 
         Window ContentWindow { get; set; }
+        StatusBar StatusBar { get; set; }
 
         void SwitchCurrentView(AbstractView view, bool addToStack = false);
         void UpdateCurrentView();
         void SwitchToPreviousView();
 
         void ShowError(string message, string title = "Error");
+        void ShowStatus(string message);
 
     }
 }

@@ -2,7 +2,7 @@
 {
     public interface ISettings
     {
-        string? MatchResultDirectory { get; set; }
+        string MatchResultDirectory { get; set; }
         DefaultFilters DefaultFilters { get; set; }
     }
 }

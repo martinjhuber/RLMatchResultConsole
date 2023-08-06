@@ -8,7 +8,15 @@ namespace RLMatchResultConsole.Common
 {
     public sealed class Settings : ISettings
     {
-        public string? MatchResultDirectory { get; set; }
+        const string DEFAULT_MATCHRESULTS_DIR = ".\\MatchResults";
+
+        private string _matchResultDirectory = DEFAULT_MATCHRESULTS_DIR;
+
+        public string MatchResultDirectory
+        {
+            get { return _matchResultDirectory; }
+            set { _matchResultDirectory = value; }
+        }
 
         public DefaultFilters DefaultFilters { get; set; } = new DefaultFilters();
 

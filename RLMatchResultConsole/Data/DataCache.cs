@@ -1,5 +1,6 @@
 ﻿using RLMatchResultConsole.Common;
 using RLMatchResultConsole.Models;
+using RLMatchResultConsole.Models.JsonV1;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,11 @@ namespace RLMatchResultConsole.Data
         public IEnumerable<Session> GetFilteredSessions()
         {
             return Sessions.Where(s => s.MatchResults.Any(mr => _filter.GameModeFilter(mr.Match)));
+        }
+
+        public void Clear() {
+            MatchResults.Clear();
+            Sessions.Clear(); 
         }
 
     }

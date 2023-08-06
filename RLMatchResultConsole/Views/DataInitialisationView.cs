@@ -16,15 +16,23 @@ namespace RLMatchResultConsole.Views
         private readonly IViewRegister _viewRegister;
         private readonly DataLoader _dataLoader;
         private readonly SessionListView _sessionListView;
+        private readonly DataFileWatcher _dataFileWatcher;
 
         private Label _progressText = new Label();
         private ProgressBar _progressBar = new ProgressBar();
 
-        public DataInitialisationView(IViewRegister viewRegister, DataLoader dataLoader, SessionListView sessionListView)
+        private Dictionary<DataLoader.ProgressType, int> _progress = new Dictionary<DataLoader.ProgressType, int>();
+
+        public DataInitialisationView(
+            IViewRegister viewRegister, 
+            DataLoader dataLoader, 
+            SessionListView sessionListView,
+            DataFileWatcher dataFileWatcher)
         {
             _viewRegister = viewRegister;
             _dataLoader = dataLoader;
             _sessionListView = sessionListView;
+            _dataFileWatcher = dataFileWatcher;
         }
 
         public override string GetTitle()
@@ -70,28 +78,43 @@ namespace RLMatchResultConsole.Views
 
         public override void Execute()
         {
-            var task = new Task(() => _dataLoader.LoadData(ProgressUpdate, DataLoadComplete));
+            _progress[DataLoader.ProgressType.MatchesFound] = 0;
+            _progress[DataLoader.ProgressType.MatchesLoaded] = 0;
+            _progress[DataLoader.ProgressType.MatchesAnalysed] = 0;
+            _progress[DataLoader.ProgressType.SessionsGenerated] = 0;
+
+            var task = new Task(() => _dataLoader.LoadFullData(ProgressUpdate));
             task.Start();
         }
 
-        public bool ProgressUpdate(float fraction, int loaded, int total, int sessions)
+        public void ProgressUpdate(DataLoader.ProgressType progressType, int count)
         {
+            if (progressType == DataLoader.ProgressType.FinishedLoading)
+            {
+                _dataFileWatcher.StartWatching();
+                _viewRegister.SwitchCurrentView(_sessionListView);
+                return;
+            }
+
+            _progress[progressType] += count;
+
+            float found = (float)_progress[DataLoader.ProgressType.MatchesFound];
+            float loaded = (float)_progress[DataLoader.ProgressType.MatchesLoaded];
+            float analysed = (float)_progress[DataLoader.ProgressType.MatchesAnalysed];
+            float sessions = (float)_progress[DataLoader.ProgressType.SessionsGenerated];
+
+            float fraction = found > 0 ? loaded / found * 0.8F + analysed / found * 0.2F : 0;
+
             Application.MainLoop.Invoke(() =>
             {
                 _progressBar.Fraction = fraction;
-                _progressText.Text = $"Completed {loaded} of {total}.";
+                _progressText.Text = $"Completed {loaded} of {found}.";
                 if (sessions > 0)
                 {
                     _progressText.Text += $" {sessions} play sessions found.";
                 }
             });
 
-            return true;
-        }
-
-        public void DataLoadComplete()
-        {
-            _viewRegister.SwitchCurrentView(_sessionListView);
         }
 
         public override void Update()

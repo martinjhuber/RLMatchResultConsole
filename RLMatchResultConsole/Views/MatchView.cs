@@ -124,7 +124,7 @@ namespace RLMatchResultConsole.Views
             var ga = _matchResult.Teams[1].TeamScore;
             var special = (match.IsForfeit ? "FF " : "") + (match.IsOvertime ? "OT" : "");
 
-            _matchRLTable.AddRow(mode, time, result, gf, ga, special);
+            _matchRLTable.AddRow(mode, time, result, gf, ga, special.Trim());
             _matchRLTable.Update();
 
             _teamRLTable.ClearRows();

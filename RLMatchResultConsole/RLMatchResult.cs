@@ -36,7 +36,9 @@ namespace RLMatchResultConsole
             _viewRegister.ContentWindow = contentWindow;
             var menuBar = CreateMenuBar();
             var toplevel = GenerateTopLevel();
-            toplevel.Add(contentWindow, menuBar);
+            var statusBar = new StatusBar();
+            _viewRegister.StatusBar = statusBar;
+            toplevel.Add(contentWindow, menuBar, statusBar);
 
             // Load first view -> DataInitialisation
             _viewRegister.SwitchCurrentView(_dataInitView);
@@ -66,6 +68,14 @@ namespace RLMatchResultConsole
                 Height = Dim.Fill()
             };
 
+        }
+
+        private StatusBar CreateStatusBar()
+        {
+            return new StatusBar()
+            {
+                Visible = true,
+            };
         }
 
         private MenuBar CreateMenuBar()

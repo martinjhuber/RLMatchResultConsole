@@ -40,44 +40,6 @@ namespace RLMatchResultConsole.Views
         {
             var content = _viewRegister.ContentWindow;
 
-            /*
-            IList sessions = _dataCache.GetFilteredSessions().OrderByDescending(s => s.FirstMatch).ToList();
-
-            Label l = new Label(1, 0, "Select a session:");
-
-            FrameView f = new FrameView()
-            {
-                X = 1,
-                Y = 1,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill()
-            };
-
-            ListView lv = new ListView(sessions)
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill()
-            };
-
-            lv.OpenSelectedItem += (arg) => { 
-                var session = arg.Value as Session;
-                if (session != null)
-                {
-                    _sessionView.SetSession(session);
-                    _viewRegister.SwitchCurrentView(_sessionView, true);
-                }
-                else
-                {
-                    _viewRegister.ShowError("This session could not be loaded correctly.");
-                }
-            };
-
-            f.Add(lv);
-            content.Add(l, f);
-            */
-
             Label l = new Label(1, 1, "Select a session.");
 
             _sessionsRLTable = new RLTableComponent(1, 3, Dim.Fill() - 1, Dim.Fill(), "Session List");
@@ -131,6 +93,7 @@ namespace RLMatchResultConsole.Views
             }
 
             _sessionsRLTable.Update();
+            _sessionsRLTable.Focus();
 
         }
     }

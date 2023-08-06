@@ -59,7 +59,7 @@ namespace RLMatchResultConsole.Views
         {
             var content = _viewRegister.ContentWindow;
 
-            _backButton = new Button(1, 1, "< Session List");
+            _backButton = new Button(1, 1, "< Back to session list");
             _backButton.Clicked += () =>
             {
                 _viewRegister.SwitchToPreviousView();
@@ -112,7 +112,9 @@ namespace RLMatchResultConsole.Views
         public override void Update()
         {
 
-            _shownMatches = _session.MatchResults.Where(mr => _filter.GameModeFilter(mr.Match)).ToList();
+            _shownMatches = _session.MatchResults
+                .Where(mr => _filter.GameModeFilter(mr.Match))
+                .OrderByDescending(mr => mr.Date).ToList();
 
             // Session
             _sessionRLTable.ClearRows();
@@ -153,7 +155,7 @@ namespace RLMatchResultConsole.Views
                     }
                 }
 
-                _matchesRLTable.AddRow(mode, time, result, gf, ga, special, mvp);
+                _matchesRLTable.AddRow(mode, time, result, gf, ga, special.Trim(), mvp);
             }
 
             _matchesRLTable.Update();
