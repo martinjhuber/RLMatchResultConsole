@@ -44,6 +44,7 @@ namespace RLMatchResultConsole {
                 .AddTransient<SessionView, SessionView>()
                 .AddTransient<MatchView, MatchView>()
                 .AddSingleton<IViewRegister, ViewRegister>()
+                .AddTransient<MatchStatsView, MatchStatsView>()
                 // Main
                 .AddSingleton<RLMatchResult, RLMatchResult>()
                 .BuildServiceProvider();
