@@ -1,5 +1,6 @@
 ﻿using RLMatchResultConsole.Common;
 using RLMatchResultConsole.Data;
+using RLMatchResultConsole.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +23,19 @@ namespace RLMatchResultConsole.Views
         private CheckBox cbTournament = new CheckBox(2, 9, "Tournament");
         private CheckBox cbRankedOnly = new CheckBox(2, 12, "Ranked only");
 
+        private readonly GameMode[] _shownGameModeBoxes = new GameMode[] {
+            GameMode.Duel, GameMode.Doubles, GameMode.Standard, GameMode.Chaos, GameMode.Tournament,
+            GameMode.Rumble, GameMode.Dropshot, GameMode.Hoops, GameMode.SnowDay };
+
+        private CheckBox[] _checkBoxes;
+        private CheckBox _cbRankedOnly = new CheckBox();
+        private CheckBox _cbDisableFilters = new CheckBox();
+
         public FiltersView(IViewRegister viewRegister, DataFilter dataFilter)
         {
             _viewRegister = viewRegister;
             _dataFilter = dataFilter;
+            _checkBoxes = new CheckBox[_shownGameModeBoxes.Length];
         }
 
         public override void Execute()
@@ -43,15 +53,31 @@ namespace RLMatchResultConsole.Views
             var content = _viewRegister.ContentWindow;
 
             Label l = new Label(1, 0, "Configure which filters are applied.");
-            FrameView gameModeFrame = new FrameView("Allowed game modes:") { X = 1, Y = 1, Width = Dim.Fill(), Height = 16 };
+            FrameView gameModeFrame = new FrameView("Allowed game modes:") { X = 1, Y = 1, Width = Dim.Fill(), Height = 17 };
 
-            gameModeFrame.Add(cbDuel, cbDoubles, cbStandard, cbChaos, cbTournament, cbRankedOnly);
-            cbDuel.Toggled += UpdateFilters;
-            cbDoubles.Toggled += UpdateFilters;
-            cbStandard.Toggled += UpdateFilters;
-            cbTournament.Toggled += UpdateFilters;
-            cbChaos.Toggled += UpdateFilters;
-            cbRankedOnly.Toggled += UpdateFilters;
+            for (int i = 0; i < _shownGameModeBoxes.Length; i++)
+            {
+                GameMode gm = _shownGameModeBoxes[i];
+
+                _checkBoxes[i] = new CheckBox(2, i+1, gm.ToViewString());
+                _checkBoxes[i].Toggled += (isChecked) => BoxToggled(isChecked, gm);
+                gameModeFrame.Add(_checkBoxes[i]);
+            }
+
+            _cbRankedOnly = new CheckBox(2, _shownGameModeBoxes.Length + 2, "Ranked only");
+            _cbRankedOnly.Toggled += (isChecked) =>
+            {
+                // the status at the moment of clicking is given. we have to reverse that
+                _dataFilter.SetRankedOnlyFilter(!isChecked);
+            };
+            gameModeFrame.Add(_cbRankedOnly);
+
+            _cbDisableFilters = new CheckBox(2, _shownGameModeBoxes.Length + 4, "Disable all filters");
+            _cbDisableFilters.Toggled += (isChecked) =>
+            {
+                _dataFilter.SetDisableFilters(!isChecked);
+            };
+            gameModeFrame.Add(_cbDisableFilters);
 
             Update();
 
@@ -61,24 +87,25 @@ namespace RLMatchResultConsole.Views
 
         public override void Update()
         {
-            cbDuel.Checked = _dataFilter.GameModeFilters.Contains(Models.GameMode.Duel);
-            cbDoubles.Checked = _dataFilter.GameModeFilters.Contains(Models.GameMode.Doubles);
-            cbStandard.Checked = _dataFilter.GameModeFilters.Contains(Models.GameMode.Standard);
-            cbChaos.Checked = _dataFilter.GameModeFilters.Contains(Models.GameMode.Chaos);
-            cbTournament.Checked = _dataFilter.GameModeFilters.Contains(Models.GameMode.Tournament);
-            cbRankedOnly.Checked = _dataFilter.RankedOnly;
+            for (int i = 0; i < _shownGameModeBoxes.Length; i++)
+            {
+                _checkBoxes[i].Checked = _dataFilter.GameModeFilters.Contains(_shownGameModeBoxes[i]);
+            }
+            _cbRankedOnly.Checked = _dataFilter.RankedOnly;
+            _cbDisableFilters.Checked = _dataFilter.DisableFilters;
         }
 
-        private void UpdateFilters(bool check)
+        private void BoxToggled(bool isChecked, GameMode gm)
         {
-            _dataFilter.GameModeFilters.Clear();
-            if (cbDuel.Checked) { _dataFilter.GameModeFilters.Add(Models.GameMode.Duel); }
-            if (cbDoubles.Checked) { _dataFilter.GameModeFilters.Add(Models.GameMode.Doubles); }
-            if (cbStandard.Checked) { _dataFilter.GameModeFilters.Add(Models.GameMode.Standard); }
-            if (cbChaos.Checked) { _dataFilter.GameModeFilters.Add(Models.GameMode.Chaos); }
-            if (cbTournament.Checked) { _dataFilter.GameModeFilters.Add(Models.GameMode.Tournament); }
-
-            _dataFilter.SetRankedOnlyFilter(cbRankedOnly.Checked);
+            isChecked = !isChecked;     // the status at the moment of clicking is given. we have to reverse that
+            if (!isChecked && _dataFilter.GameModeFilters.Contains(gm))
+            {
+                _dataFilter.GameModeFilters.Remove(gm);
+            }
+            if (isChecked && !_dataFilter.GameModeFilters.Contains(gm))
+            {
+                _dataFilter.GameModeFilters.Add(gm);
+            }
 
         }
     }

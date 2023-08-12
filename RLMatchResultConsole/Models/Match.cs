@@ -15,6 +15,10 @@ namespace RLMatchResultConsole.Models
         Standard,
         Chaos,
         Tournament,
+        Rumble,
+        Dropshot,
+        Hoops,
+        SnowDay,
     }
 
     internal static class MatchEnumExtensions
@@ -24,17 +28,9 @@ namespace RLMatchResultConsole.Models
             switch (gm)
             {
                 case GameMode.Undef:
-                    return "???";
-                case GameMode.Duel:
-                    return "1v1";
-                case GameMode.Doubles:
-                    return "2v2";
-                case GameMode.Standard:
-                    return "3v3";
-                case GameMode.Chaos:
-                    return "4v4";
-                case GameMode.Tournament:
-                    return "Tourn";
+                    return "Other";
+                case GameMode.SnowDay:
+                    return "Snow Day";
                 default:
                     return gm.ToString();
             }
@@ -80,6 +76,18 @@ namespace RLMatchResultConsole.Models
                     break;
                 case "Tournament Match":
                     GameMode = GameMode.Tournament;
+                    break;
+                case "Rumble":
+                    GameMode = GameMode.Rumble;
+                    break;
+                case "Dropshot":
+                    GameMode = GameMode.Dropshot;
+                    break;
+                case "Hoops":
+                    GameMode = GameMode.Hoops;
+                    break;
+                case "Snow Day":
+                    GameMode = GameMode.SnowDay;
                     break;
                 default:
                     GameMode = GameMode.Undef;

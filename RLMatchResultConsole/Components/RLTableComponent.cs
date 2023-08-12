@@ -127,6 +127,23 @@ namespace RLMatchResultConsole.Components
             _tableView.FocusFirst();
         }
 
+        public void SortBy(string columnName, bool descending = true)
+        {
+            _tableView.Table.DefaultView.Sort = columnName + " " + (descending ? "DESC" : "ASC");
+
+            var sortedCopy = _tableView.Table.DefaultView.ToTable();
+            _tableView.Table.Rows.Clear();
+            foreach (DataRow r in sortedCopy.Rows)
+            {
+                _tableView.Table.ImportRow(r);
+            }
+        }
+
+        public void SortBy(int columnIndex, bool descending = true)
+        {
+            SortBy(_dataTable.Columns[columnIndex].ColumnName, descending);
+        }
+
         public bool FullRowSelect
         {
             get { return _tableView.FullRowSelect; }

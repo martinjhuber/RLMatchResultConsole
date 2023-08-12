@@ -15,7 +15,14 @@ namespace RLMatchResultConsole.Common
         public string MatchResultDirectory
         {
             get { return _matchResultDirectory; }
-            set { _matchResultDirectory = value; }
+            set {
+                if (value.Contains("%APPDATA%"))
+                {
+                    value = value.Replace("%APPDATA%", 
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+                }
+                _matchResultDirectory = value; 
+            }
         }
 
         public DefaultFilters DefaultFilters { get; set; } = new DefaultFilters();
@@ -27,6 +34,7 @@ namespace RLMatchResultConsole.Common
         public string[] GameModes { get; set; } = new string[0];
 
         public bool RankedOnly { get; set; } = true;
+        public bool DisableFilters { get; set; } = false;
 
     }
 

@@ -83,14 +83,23 @@ namespace RLMatchResultConsole.Views
             _progress[DataLoader.ProgressType.MatchesAnalysed] = 0;
             _progress[DataLoader.ProgressType.SessionsGenerated] = 0;
 
-            var task = new Task(() => _dataLoader.LoadFullData(ProgressUpdate));
-            task.Start();
+            Task.Run(() => _dataLoader.LoadFullData(ProgressUpdate)).ContinueWith((t) =>
+            {
+                if (t.IsFaulted)
+                {
+                    Console.Error.WriteLine("Cannot load data. Is the path to the match results folder " +
+                    "correctly configured? Please check the appsettings.json file.");
+                    Environment.Exit(1);
+                }
+            });
+
         }
 
-        public void ProgressUpdate(DataLoader.ProgressType progressType, int count)
+        private void ProgressUpdate(DataLoader.ProgressType progressType, int count)
         {
             if (progressType == DataLoader.ProgressType.FinishedLoading)
             {
+                _dataFileWatcher.Init();
                 _dataFileWatcher.StartWatching();
                 _viewRegister.SwitchCurrentView(_sessionListView);
                 return;

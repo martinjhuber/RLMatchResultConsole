@@ -40,7 +40,7 @@ namespace RLMatchResultConsole.Views
         {
             var content = _viewRegister.ContentWindow;
 
-            _matchRLTable = new RLTableComponent(1, 3, Dim.Fill(), Dim.Fill());
+            _matchRLTable = new RLTableComponent(1, 1, Dim.Fill(), Dim.Fill());
 
             _matchRLTable.AddColumn(typeof(string), "Mode", minWidth: 20, scheme: _matchRLTable.NormalNoFocus);
             _matchRLTable.AddColumn(typeof(string), "Games", minWidth: 17, align: TextAlignment.Centered, scheme: _matchRLTable.NormalNoFocus);
@@ -97,22 +97,22 @@ namespace RLMatchResultConsole.Views
             var otLosses = matches.Count(m => m.Match.Result == Result.Loss && m.Match.IsOvertime == true);
             var totalOt = otWins + otLosses;
             var otPercent = "0.00%";
-            var totalOtPercent = "0.00%";
+            var totalOtPercent = "0.0%";
             if (games > 0 && totalOt > 0)
             {
-                otPercent = ((float)otWins / totalOt * 100).ToString("0.0") + "%";
-                totalOtPercent = ((float)totalOt / games * 100).ToString("0.00") + "%";
+                otPercent = ((float)otWins / totalOt * 100).ToString("0.00") + "%";
+                totalOtPercent = ((float)totalOt / games * 100).ToString("0.0") + "%";
             }
 
             var ffWins = matches.Count(m => m.Match.Result == Result.Win && m.Match.IsForfeit == true);
             var ffLosses = matches.Count(m => m.Match.Result == Result.Loss && m.Match.IsForfeit == true);
             var totalFf = ffWins + ffLosses;
             var ffPercent = "0.00%";
-            var totalFfPercent = "0.00%";
+            var totalFfPercent = "0.0%";
             if (games > 0 && totalFf > 0)
             {
-                ffPercent = ((float)ffWins / totalFf * 100).ToString("0.0") + "%";
-                totalFfPercent = ((float)totalFf / games * 100).ToString("0.00") + "%";
+                ffPercent = ((float)ffWins / totalFf * 100).ToString("0.00") + "%";
+                totalFfPercent = ((float)totalFf / games * 100).ToString("0.0") + "%";
             }
 
             _matchRLTable.AddRow(mode, games, $"{gfs+gas}", $"{totalOt} ({totalOtPercent})", $"{totalFf} ({totalFfPercent})");

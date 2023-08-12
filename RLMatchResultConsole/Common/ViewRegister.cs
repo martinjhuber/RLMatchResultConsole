@@ -54,8 +54,10 @@ namespace RLMatchResultConsole.Common
         public void ShowError(string message, string title = "Error")
         {
             var n = MessageBox.Query(title, message, "OK", "Quit");
-            if (n == 1) { 
-                Application.RequestStop();
+            if (n == 1) {
+                try {
+                    Application.RequestStop();
+                } catch { }
                 Environment.Exit(-2);
             }
 

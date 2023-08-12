@@ -151,21 +151,7 @@ namespace RLMatchResultConsole.Data
 
                     if (matchResultV1.match.gameMode != null)
                     {
-                        switch (matchResultV1.match.gameMode)
-                        {
-                            case "Duel":
-                                m.GameMode = GameMode.Duel; break;
-                            case "Doubles":
-                                m.GameMode = GameMode.Doubles; break;
-                            case "Standard":
-                                m.GameMode = GameMode.Standard; break;
-                            case "Chaos":
-                                m.GameMode = GameMode.Chaos; break;
-                            case "Tournament Match":
-                                m.GameMode = GameMode.Tournament; break;
-                            default:
-                                m.GameMode = GameMode.Undef; break;
-                        }
+                        m.SetGameModeByString(matchResultV1.match.gameMode);
                     }
 
                     if (matchResultV1.match.result != null)

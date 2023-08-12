@@ -12,6 +12,8 @@ namespace RLMatchResultConsole {
 
     public class Program {
 
+        private static IViewRegister? _vr = null;
+
         public static int Main ()
         {
             Application.Init();
@@ -45,11 +47,14 @@ namespace RLMatchResultConsole {
                 .AddTransient<MatchView, MatchView>()
                 .AddSingleton<IViewRegister, ViewRegister>()
                 .AddTransient<MatchStatsView, MatchStatsView>()
+                .AddTransient<PlayerStatsView, PlayerStatsView>()
                 // Main
                 .AddSingleton<RLMatchResult, RLMatchResult>()
                 .BuildServiceProvider();
 
             var mr = serviceProvider.GetRequiredService<RLMatchResult>();
+            _vr = serviceProvider.GetRequiredService<IViewRegister>();
+
             var toplevel = mr.Start();
 
             Application.Run(toplevel, ExceptionHandler);
@@ -60,8 +65,14 @@ namespace RLMatchResultConsole {
 
         internal static bool ExceptionHandler (Exception e) {
 
+            if (_vr is not null)
+            {
+                _vr.ShowError(e.ToString());
+                return true;
+            }
+
             Console.Error.WriteLine(e.ToString());
-            Console.Error.WriteLine(e.StackTrace);
+            //Console.Error.WriteLine(e.StackTrace);
             return false;
         }
 

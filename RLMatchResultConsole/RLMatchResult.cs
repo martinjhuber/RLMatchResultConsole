@@ -17,18 +17,21 @@ namespace RLMatchResultConsole
         private readonly DataInitialisationView _dataInitView;
         private readonly SessionListView _sessionListView;
         private readonly MatchStatsView _matchStatsView;
+        private readonly PlayerStatsView _playerStatsView;
         private readonly FiltersView _filtersView;
 
         public RLMatchResult(IViewRegister viewRegister,
             DataInitialisationView dataInitView,
             SessionListView sessionListView,
             MatchStatsView matchStatsView,
+            PlayerStatsView playerStatsView,
             FiltersView filtersView) {
 
             _viewRegister = viewRegister;
             _dataInitView = dataInitView;
             _sessionListView = sessionListView;
             _matchStatsView = matchStatsView;
+            _playerStatsView = playerStatsView;
             _filtersView = filtersView;
         }
 
@@ -102,6 +105,7 @@ namespace RLMatchResultConsole
                     new MenuBarItem ("S_tats",
                         new MenuItem [] {
                             new MenuItem ("_Match stats", "", () => _viewRegister.SwitchCurrentView(_matchStatsView)),
+                            new MenuItem ("_Player stats", "", () => _viewRegister.SwitchCurrentView(_playerStatsView)),
                         }
                     ),
                 }

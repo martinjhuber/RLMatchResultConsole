@@ -22,7 +22,7 @@ namespace RLMatchResultConsole.Data
         private readonly IViewRegister _viewRegister;
         private readonly SessionListView _sessionListView;
 
-        private FileSystemWatcher _watcher;
+        private FileSystemWatcher? _watcher;
 
         public DataFileWatcher(ISettings settings, DataLoader dataLoader, IViewRegister viewRegister, SessionListView sessionListView)
         {
@@ -30,7 +30,10 @@ namespace RLMatchResultConsole.Data
             _dataLoader = dataLoader;
             _viewRegister = viewRegister;
             _sessionListView = sessionListView;
+        }
 
+        public void Init()
+        {
             string path = _settings.MatchResultDirectory;
 
             _watcher = new FileSystemWatcher(path);
@@ -46,12 +49,12 @@ namespace RLMatchResultConsole.Data
 
         public void StartWatching()
         {
-            _watcher.EnableRaisingEvents = true;
+            _watcher!.EnableRaisingEvents = true;
         }
 
         public void PauseWatching()
         {
-            _watcher.EnableRaisingEvents = false;
+            _watcher!.EnableRaisingEvents = false;
         }
 
         private void UpdateDatabase(object source, FileSystemEventArgs e)

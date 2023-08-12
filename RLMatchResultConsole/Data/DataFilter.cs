@@ -14,6 +14,7 @@ namespace RLMatchResultConsole.Data
         private readonly ISettings _settings;
 
         public bool RankedOnly { get; private set; } = true;
+        public bool DisableFilters { get; private set; } = false;
         public List<GameMode> GameModeFilters { get; private set; } = new();
 
         public Func<Match, bool> GameModeFilter { get; private set; } = (Match m) => false;
@@ -24,6 +25,7 @@ namespace RLMatchResultConsole.Data
             
             SetGameModeFilters(_settings.DefaultFilters.GameModes);
             SetRankedOnlyFilter(_settings.DefaultFilters.RankedOnly);
+            SetDisableFilters(_settings.DefaultFilters.DisableFilters);
 
         }
 
@@ -42,9 +44,18 @@ namespace RLMatchResultConsole.Data
         {
             RankedOnly = rankedOnly;
         }
+        public void SetDisableFilters(bool disableFilters)
+        {
+            DisableFilters = disableFilters;
+        }
 
         public bool IsAllowed(Match m)
         {
+            if (DisableFilters)
+            {
+                return true;
+            }
+
             if (RankedOnly && m.IsRanked == false)
             {
                 return false;

@@ -117,7 +117,7 @@ namespace RLMatchResultConsole.Views
 
             _matchRLTable.ClearRows();
 
-            var mode = (match.IsRanked ? "Ranked " : "") + _matchResult.Match.GameMode.ToString();
+            var mode = (match.IsRanked ? "Ranked " : "") + _matchResult.Match.GameMode.ToViewString();
             var time = Formatting.FormatDateTimeHourMinute(_matchResult.Date);
             var result = match.Result.ToString();
             var gf = _matchResult.Teams[0].TeamScore;
