@@ -75,13 +75,13 @@ namespace RLMatchResultConsole.Views
         {
             _sessionsRLTable.ClearRows();
 
-            _shownSessions = _dataCache.GetFilteredSessions().OrderByDescending(s => s.FirstMatch).ToList();
+            _shownSessions = _dataCache.GetFilteredSessions().OrderByDescending(s => s.FirstMatchDateTime).ToList();
 
             foreach (var session in _shownSessions)
             {
                 var shownMatches = session.MatchResults.Where(mr => _filter.GameModeFilter(mr.Match)).ToList();
 
-                var date = Formatting.FormatDateTimeFull(session.FirstMatch);
+                var date = Formatting.FormatDateTimeFull(session.FirstMatchDateTime);
                 var wins = shownMatches.Count(mr => mr.Match.Result == Result.Win);
                 var losses = shownMatches.Count(mr => mr.Match.Result == Result.Loss);
                 var gfs = shownMatches.Sum(mr => mr.Teams[0].TeamScore);

@@ -50,7 +50,7 @@ namespace RLMatchResultConsole.Views
 
         public override string GetTitle()
         {
-            return $"Session {Formatting.FormatDateTimeFull(_session.FirstMatch)}";
+            return $"Session {Formatting.FormatDateTimeFull(_session.FirstMatchDateTime)}";
         }
 
         // Session: Num games, Wins, Losses, GF, GA

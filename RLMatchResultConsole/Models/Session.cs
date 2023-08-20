@@ -12,7 +12,8 @@ namespace RLMatchResultConsole.Models
 
         const int MAX_HOURS_BETWEEN_MATCHES = 3;
 
-        public DateTime FirstMatch { get; set; } = DateTime.MaxValue;
+        public DateTime FirstMatchDateTime { get; set; } = DateTime.MaxValue;
+        public DateTime LastMatchDateTime { get; set; } = DateTime.MinValue;
 
         public List<MatchResult> MatchResults { get; set; } = new List<MatchResult>();
 
@@ -21,18 +22,16 @@ namespace RLMatchResultConsole.Models
         {
             MatchResults.Add(matchResult);
 
-            if (matchResult.Date < FirstMatch)
-            {
-                FirstMatch = matchResult.Date;
-            }
+            FirstMatchDateTime = matchResult.Date < FirstMatchDateTime ? matchResult.Date : FirstMatchDateTime;
+            LastMatchDateTime = matchResult.Date > LastMatchDateTime ? matchResult.Date : LastMatchDateTime;
         }
 
         public bool IsMatchResultInSession(MatchResult matchResult)
         {
-            var startDate = FirstMatch.AddHours(MAX_HOURS_BETWEEN_MATCHES * -1);
-            return (matchResult.Date >= startDate);
+            var startDate = FirstMatchDateTime.AddHours(MAX_HOURS_BETWEEN_MATCHES * -1);
+            var endDate = LastMatchDateTime.AddHours(MAX_HOURS_BETWEEN_MATCHES);
+            return (matchResult.Date >= startDate && matchResult.Date <= endDate);
         }
-
 
         public override string ToString()
         {
@@ -70,7 +69,7 @@ namespace RLMatchResultConsole.Models
             }
 
             return string.Format("{0} | {1,2} W - {2,2} L | {3,3}:{4,3} | {6}", 
-                Formatting.FormatDateTimeFull(FirstMatch),
+                Formatting.FormatDateTimeFull(FirstMatchDateTime),
                 wins, losses, gf, ga,
                 MatchResults.Count, 
                 sb.ToString());
