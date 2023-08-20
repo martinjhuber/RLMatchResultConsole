@@ -88,7 +88,7 @@ namespace RLMatchResultConsole.Views
                 if (t.IsFaulted)
                 {
                     Console.Error.WriteLine("Cannot load data. Is the path to the match results folder " +
-                    "correctly configured? Please check the appsettings.json file.");
+                    "correctly configured? Please check the RLMatchResultConsole.config.json file.");
                     Environment.Exit(1);
                 }
             });

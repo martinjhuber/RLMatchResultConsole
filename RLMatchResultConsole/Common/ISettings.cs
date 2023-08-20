@@ -3,6 +3,8 @@
     public interface ISettings
     {
         string MatchResultDirectory { get; set; }
-        DefaultFilters DefaultFilters { get; set; }
+        Filters Filters { get; set; }
+
+        string GetParsedMatchResultDirectory();
     }
 }

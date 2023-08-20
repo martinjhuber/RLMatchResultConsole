@@ -34,7 +34,7 @@ namespace RLMatchResultConsole.Data
 
         public void Init()
         {
-            string path = _settings.MatchResultDirectory;
+            string path = _settings.GetParsedMatchResultDirectory();
 
             _watcher = new FileSystemWatcher(path);
 

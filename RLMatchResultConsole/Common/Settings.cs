@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,33 +9,29 @@ namespace RLMatchResultConsole.Common
 {
     public sealed class Settings : ISettings
     {
-        const string DEFAULT_MATCHRESULTS_DIR = ".\\MatchResults";
+        const string DEFAULT_MATCHRESULTS_DIR = "%APPDATA%\\bakkesmod\\bakkesmod\\data\\MatchResults";
 
-        private string _matchResultDirectory = DEFAULT_MATCHRESULTS_DIR;
+        public string MatchResultDirectory { get; set; } = DEFAULT_MATCHRESULTS_DIR;
 
-        public string MatchResultDirectory
+        public Filters Filters { get; set; } = new Filters();
+
+        public string GetParsedMatchResultDirectory()
         {
-            get { return _matchResultDirectory; }
-            set {
-                if (value.Contains("%APPDATA%"))
-                {
-                    value = value.Replace("%APPDATA%", 
-                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-                }
-                _matchResultDirectory = value; 
+            if (MatchResultDirectory.Contains("%APPDATA%"))
+            {
+                return MatchResultDirectory.Replace("%APPDATA%",
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
             }
+            return MatchResultDirectory;
         }
-
-        public DefaultFilters DefaultFilters { get; set; } = new DefaultFilters();
-
     }
 
-    public sealed class DefaultFilters
+    public sealed class Filters
     {
-        public string[] GameModes { get; set; } = new string[0];
+        public List<string> GameModes { get; set; } = new();
 
         public bool RankedOnly { get; set; } = true;
-        public bool DisableFilters { get; set; } = false;
+        public bool DisableFilters { get; set; } = true;
 
     }
 

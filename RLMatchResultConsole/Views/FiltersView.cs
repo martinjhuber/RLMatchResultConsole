@@ -1,11 +1,6 @@
 ﻿using RLMatchResultConsole.Common;
 using RLMatchResultConsole.Data;
 using RLMatchResultConsole.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terminal.Gui;
 
 namespace RLMatchResultConsole.Views
@@ -15,13 +10,6 @@ namespace RLMatchResultConsole.Views
 
         private readonly IViewRegister _viewRegister;
         private readonly DataFilter _dataFilter;
-
-        private CheckBox cbDuel = new CheckBox(2, 1, "Duel");
-        private CheckBox cbDoubles = new CheckBox(2, 3, "Doubles");
-        private CheckBox cbStandard = new CheckBox(2, 5, "Standard");
-        private CheckBox cbChaos = new CheckBox(2, 7, "Chaos");
-        private CheckBox cbTournament = new CheckBox(2, 9, "Tournament");
-        private CheckBox cbRankedOnly = new CheckBox(2, 12, "Ranked only");
 
         private readonly GameMode[] _shownGameModeBoxes = new GameMode[] {
             GameMode.Duel, GameMode.Doubles, GameMode.Standard, GameMode.Chaos, GameMode.Tournament,
@@ -53,7 +41,7 @@ namespace RLMatchResultConsole.Views
             var content = _viewRegister.ContentWindow;
 
             Label l = new Label(1, 0, "Configure which filters are applied.");
-            FrameView gameModeFrame = new FrameView("Allowed game modes:") { X = 1, Y = 1, Width = Dim.Fill(), Height = 17 };
+            FrameView gameModeFrame = new FrameView("Allowed game modes:") { X = 1, Y = 2, Width = Dim.Fill(), Height = 13 };
 
             for (int i = 0; i < _shownGameModeBoxes.Length; i++)
             {
@@ -64,24 +52,27 @@ namespace RLMatchResultConsole.Views
                 gameModeFrame.Add(_checkBoxes[i]);
             }
 
-            _cbRankedOnly = new CheckBox(2, _shownGameModeBoxes.Length + 2, "Ranked only");
+            FrameView globalSettingsFrame = new FrameView("Global settings:") { X = 1, Y = 15, Width = Dim.Fill(), Height = 7 };
+
+            _cbRankedOnly = new CheckBox(2, 1, "Ranked only");
             _cbRankedOnly.Toggled += (isChecked) =>
             {
                 // the status at the moment of clicking is given. we have to reverse that
-                _dataFilter.SetRankedOnlyFilter(!isChecked);
+                _dataFilter.RankedOnly = !isChecked;
             };
-            gameModeFrame.Add(_cbRankedOnly);
+            globalSettingsFrame.Add(_cbRankedOnly);
 
-            _cbDisableFilters = new CheckBox(2, _shownGameModeBoxes.Length + 4, "Disable all filters");
+            _cbDisableFilters = new CheckBox(2, 3, "Disable all filters");
             _cbDisableFilters.Toggled += (isChecked) =>
             {
-                _dataFilter.SetDisableFilters(!isChecked);
+                _dataFilter.DisableFilters = !isChecked;
+                UpdateEnableStatus();
             };
-            gameModeFrame.Add(_cbDisableFilters);
+            globalSettingsFrame.Add(_cbDisableFilters);
 
             Update();
 
-            content.Add(l, gameModeFrame);
+            content.Add(l, gameModeFrame, globalSettingsFrame);
 
         }
 
@@ -89,24 +80,26 @@ namespace RLMatchResultConsole.Views
         {
             for (int i = 0; i < _shownGameModeBoxes.Length; i++)
             {
-                _checkBoxes[i].Checked = _dataFilter.GameModeFilters.Contains(_shownGameModeBoxes[i]);
+                _checkBoxes[i].Checked = _dataFilter.IsGameModeShown(_shownGameModeBoxes[i]);
             }
             _cbRankedOnly.Checked = _dataFilter.RankedOnly;
             _cbDisableFilters.Checked = _dataFilter.DisableFilters;
+            UpdateEnableStatus();
+        }
+
+        public void UpdateEnableStatus()
+        {
+            for (int i = 0; i < _shownGameModeBoxes.Length; i++)
+            {
+                _checkBoxes[i].Enabled = !_dataFilter.DisableFilters;
+            }
+            _cbRankedOnly.Enabled = !_dataFilter.DisableFilters;
         }
 
         private void BoxToggled(bool isChecked, GameMode gm)
         {
             isChecked = !isChecked;     // the status at the moment of clicking is given. we have to reverse that
-            if (!isChecked && _dataFilter.GameModeFilters.Contains(gm))
-            {
-                _dataFilter.GameModeFilters.Remove(gm);
-            }
-            if (isChecked && !_dataFilter.GameModeFilters.Contains(gm))
-            {
-                _dataFilter.GameModeFilters.Add(gm);
-            }
-
+            _dataFilter.SetGameModeFilter(gm, isChecked);
         }
     }
 }

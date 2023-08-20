@@ -2,9 +2,6 @@
 using RLMatchResultConsole.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RLMatchResultConsole.Data
 {
@@ -13,40 +10,58 @@ namespace RLMatchResultConsole.Data
 
         private readonly ISettings _settings;
 
-        public bool RankedOnly { get; private set; } = true;
-        public bool DisableFilters { get; private set; } = false;
-        public List<GameMode> GameModeFilters { get; private set; } = new();
+        public bool RankedOnly {
+            get
+            {
+                return _settings.Filters.RankedOnly;
+            }
+            set
+            {
+                _settings.Filters.RankedOnly = value;
+                Program.SaveSettings();
+            }
+        }
+
+        public bool DisableFilters
+        {
+            get
+            {
+                return _settings.Filters.DisableFilters;
+            }
+            set
+            {
+                _settings.Filters.DisableFilters = value;
+                Program.SaveSettings();
+            }
+        }
 
         public Func<Match, bool> GameModeFilter { get; private set; } = (Match m) => false;
 
         public DataFilter(ISettings settings)
         {
             _settings = settings;
-            
-            SetGameModeFilters(_settings.DefaultFilters.GameModes);
-            SetRankedOnlyFilter(_settings.DefaultFilters.RankedOnly);
-            SetDisableFilters(_settings.DefaultFilters.DisableFilters);
-
-        }
-
-        public void SetGameModeFilters(string[] gameModeFilterArray)
-        {
-            foreach (string gameModeFilter in gameModeFilterArray)
-            {
-                GameMode gm = (GameMode)Enum.Parse(typeof(GameMode), gameModeFilter);
-                GameModeFilters.Add(gm);
-            }
-
             GameModeFilter = (Match m) => { return IsAllowed(m); };
         }
 
-        public void SetRankedOnlyFilter(bool rankedOnly)
+        public void SetGameModeFilter(GameMode gameMode, bool isShown)
         {
-            RankedOnly = rankedOnly;
+            string gms = gameMode.ToString();
+
+            if (!isShown && _settings.Filters.GameModes.Contains(gms))
+            {
+                _settings.Filters.GameModes.Remove(gms);
+                Program.SaveSettings();
+            }
+            if (isShown && !_settings.Filters.GameModes.Contains(gms))
+            {
+                _settings.Filters.GameModes.Add(gms);
+                Program.SaveSettings();
+            }
         }
-        public void SetDisableFilters(bool disableFilters)
+
+        public bool IsGameModeShown(GameMode gameMode)
         {
-            DisableFilters = disableFilters;
+            return _settings.Filters.GameModes.Contains(gameMode.ToString());
         }
 
         public bool IsAllowed(Match m)
@@ -61,7 +76,7 @@ namespace RLMatchResultConsole.Data
                 return false;
             }
 
-            return GameModeFilters.Contains(m.GameMode);
+            return _settings.Filters.GameModes.Contains(m.GameMode.ToString());
         }
 
     }

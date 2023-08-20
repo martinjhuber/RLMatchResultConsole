@@ -43,7 +43,7 @@ namespace RLMatchResultConsole.Data
 
             _dataCache.Clear();
 
-            string path = _settings.MatchResultDirectory;
+            string path = _settings.GetParsedMatchResultDirectory();
 
             DirectoryInfo dir = new DirectoryInfo(path);
             FileInfo[] files = dir.GetFiles("*.json").ToArray();
