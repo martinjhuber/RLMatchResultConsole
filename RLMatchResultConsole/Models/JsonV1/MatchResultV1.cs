@@ -10,6 +10,7 @@ namespace RLMatchResultConsole.Models.JsonV1
     {
 
         public DateTime? date { get; set; }
+        public string? error { get; set; }
         public MatchV1? match { get; set; } = null;
 
         public List<List<PlayerV1>>? players { get; set; } = null;

@@ -126,7 +126,7 @@ namespace RLMatchResultConsole.Data
 
         }
 
-        private MatchResult ParseMatchResultV1 (string content)
+        private MatchResult? ParseMatchResultV1 (string content)
         {
 
             MatchResultV1? matchResultV1 = JsonConvert.DeserializeObject<MatchResultV1>(content);
@@ -134,8 +134,13 @@ namespace RLMatchResultConsole.Data
             MatchResult mr = new MatchResult();
             if (matchResultV1 != null)
             {
-                mr.Date = matchResultV1.date ?? DateTime.UtcNow;
+                if (matchResultV1.error is not null)
+                {
+                    return null;
+                }
 
+                mr.Date = matchResultV1.date ?? DateTime.UtcNow;
+                
                 if (matchResultV1.match != null)
                 {
                     Models.Match m = new Models.Match()

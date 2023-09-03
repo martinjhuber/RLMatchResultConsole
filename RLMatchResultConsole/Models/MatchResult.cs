@@ -10,6 +10,8 @@ namespace RLMatchResultConsole.Models
     {
         internal string? FileName { get; set; }
 
+        internal string? Error { get; set; }
+
         public DateTime Date { get; set; }
         public Match Match { get; set; } = new Match();
 
